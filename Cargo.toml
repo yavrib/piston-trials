@@ -1,0 +1,9 @@
+[package]
+name = "shapes"
+version = "0.1.0"
+authors = ["Berkan Yavri <berkan.yavri@deliveryhero.com>"]
+
+[dependencies]
+piston = "0.37.0"
+piston_window = "0.81.0"
+find_folder = "*"
