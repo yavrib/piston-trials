@@ -26,15 +26,25 @@ struct Shape {
     y: f64,
     height: f64,
     width: f64,
+    destination: [f64; 2],
+}
+
+fn get_step([x, y]: [f64; 2], [dest_x, dest_y]: [f64; 2]) -> [f64; 2] {
+    let mut distance_x = dest_x - x;
+    let mut distance_y = dest_y - y;
+    let distance: f64 = ((distance_x).powf(2f64) + (distance_y).powf(2f64)).sqrt();
+
+    [distance / distance_y, distance / distance_x]
 }
 
 fn main() {
     let mut window: PistonWindow<Sdl2Window> =
         WindowSettings::new("Hello Piston!", [1000, 800])
             .resizable(false)
+            .vsync(true)
             .fullscreen(true)
             .exit_on_esc(true).build().unwrap();
-    let mut events = Events::new(EventSettings::new().lazy(true));
+    let mut events = Events::new(EventSettings::new().lazy(false));
     let assets = find_folder::Search::ParentsThenKids(3, 3)
         .for_folder("assets").unwrap();
     let ref font = assets.join("FiraSans-Regular.ttf");
@@ -56,9 +66,17 @@ fn main() {
         y: 0.0,
         height: 100.0,
         width: 100.0,
+        destination: [0.0, 0.0],
     };
 
     while let Some(e) = events.next(&mut window) {
+        if rectanglee.destination[0] != rectanglee.x || rectanglee.destination[1] != rectanglee.y {
+            let steps = get_step([rectanglee.x, rectanglee.y], [rectanglee.destination[0], rectanglee.destination[1]]);
+
+            rectanglee.x = rectanglee.x + steps[0];
+            rectanglee.y = rectanglee.y + steps[1];
+        }
+
         window.draw_2d(&e, |c, g| {
             clear([1.0; 4], g);
             rectangle([rectanglee.color.r, rectanglee.color.g, rectanglee.color.b, rectanglee.color.a],
@@ -75,8 +93,9 @@ fn main() {
             println!("Pressed mouse button '{:?}'", button);
             if button == MouseButton::Left {
                 message = format!("Left, {:?}, {:?}", cursor[0], cursor[1]);
-                rectanglee.x = cursor[0];
-                rectanglee.y = cursor[1];
+                rectanglee.destination = cursor.clone();
+                // rectanglee.x = cursor[0];
+                // rectanglee.y = cursor[1];
             }
         }
 
